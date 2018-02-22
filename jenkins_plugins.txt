@@ -1,0 +1,5 @@
+docker
+git
+gitlab-plugin
+job-dsl
+workflow-aggregator
