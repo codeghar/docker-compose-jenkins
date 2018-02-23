@@ -1,0 +1,9 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<jenkins.CLI>
+    <enabled>false</enabled>
+</jenkins.CLI>
+<!--
+    Disable CLI remoting, which is a security risk.
+    https://jenkins.io/doc/book/managing/cli/#client-connection-modes
+    Source https://stackoverflow.com/a/45250763
+-->

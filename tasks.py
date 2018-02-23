@@ -88,8 +88,10 @@ def jenkins_master_init(ctx):
     :return: None
     """
     os.makedirs(JENKINS_HOME_DIR, exist_ok=True)
-    os.makedirs(os.path.join(JENKINS_HOME_DIR, "init.groovy.d"), exist_ok=True)
+    shutil.copy2(os.path.join(".", "jenkins.CLI.xml"),
+                 os.path.join(JENKINS_HOME_DIR, "jenkins.CLI.xml"))
 
+    os.makedirs(os.path.join(JENKINS_HOME_DIR, "init.groovy.d"), exist_ok=True)
     shutil.copy2(os.path.join(".", "jenkins_admin_user.groovy"),
                  os.path.join(JENKINS_HOME_DIR, "init.groovy.d", "admin_user.groovy"))
 
