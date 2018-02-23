@@ -151,7 +151,7 @@ def install_jenkins_plugins(ctx, plugins=None):
     """
     cmd = f"docker-compose exec cli java -jar jenkins-cli.jar -auth {JENKINS_USER}:{JENKINS_PASSWORD} install-plugin"
     for plugin in plugins:
-        ctx.run(f"{cmd} {plugin} -deploy", pty=True, hide=False)
+        ctx.run(f"{cmd} {plugin} -deploy", pty=True, hide=True)
 
 
 def restart_jenkins(ctx):
