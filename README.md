@@ -20,8 +20,8 @@ config or ideas, etc.
 3. Copies *jenkins_admin_user.groovy* to *jenkins_home/init.groovy.d/*. This file creates a default admin user without needing to do the same in the web interface. See customization section for more information.
 4. Creates the Jenkins master container.
 5. Installs plugins listed in *jenkins_plugins.txt*. See customization section to see how to install your desired plugins.
-6. Restarts the Jenkins master container. This gives the Jenkins master to load all settings since changes were made.
-7. Runs ``git update-index --assume-unchanged ./docker-compose.yml`` to ignore any changes made to the file as described in the Customize section. Manually revert this with ``git update-index --no-assume-unchanged ./docker-compose.yml``.
+6. Restarts the Jenkins server. This gives the Jenkins master to load all settings since changes were made.
+7. Run test(s) to verify all changes were made successfully.
 
 # Environment Lifecycle
 
