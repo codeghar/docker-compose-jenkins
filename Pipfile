@@ -8,6 +8,9 @@ name = "pypi"
 [packages]
 
 docker-compose = "*"
+invoke = "*"
+requests = "*"
+pylint = "*"
 
 
 [dev-packages]
