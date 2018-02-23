@@ -9,10 +9,11 @@ config or ideas, etc.
 * Python 3.6+
 * [pipenv](https://docs.pipenv.org/)
 * GNU make
+* jq
 
 # Initial Setup
 
-        $ make all
+        $ make create
 
 1. Installs required Python packages using ``pipenv``.
 2. Creates *./jenkins_home/* directory, to be mounted in the Jenkins master container.
@@ -91,8 +92,8 @@ workaround is used in the Makefile.
 
 ## docker-compose.yml
 
-Mounts *jenkins_home* directory (created by ``make all`` or more specifically
-by ``make init``) into the Jenkins master container.
+Mounts *jenkins_home* directory (created by ``make create`` or more
+specifically by ``make init``) into the Jenkins master container.
 
 *JAVA_OPTS* environment variable is used to
 [disable the setup wizard](https://groups.google.com/d/msg/jenkinsci-users/Pb4QZVc2-f0/PJnKcbieBgAJ)
