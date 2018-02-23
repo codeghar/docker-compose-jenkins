@@ -1,6 +1,7 @@
 PWD := $(shell pwd)
+BIN := $(PWD)/bin
 JENKINS_HOME := $(PWD)/jenkins_home
-JENKINS_URL := http://localhost:8080
+JENKINS_AUTH := -u '$(JENKINS_LEADER_ADMIN_USER)':'$(JENKINS_LEADER_ADMIN_PASSWORD)'
 
 .PHONY: create
 create: init setup restart-jenkins-master test
@@ -48,29 +49,18 @@ stop:
 .PHONY: restart
 restart:
 	. .envrc && pipenv run docker-compose restart
-	@{ \
-		echo 'Check Jenkins master is available' ; \
-		while [[ $$(curl -s -w "%{http_code}" -u '$(JENKINS_LEADER_ADMIN_USER)':'$(JENKINS_LEADER_ADMIN_PASSWORD)' $(JENKINS_URL)/ -o /dev/null) != "200" ]]; do \
-			sleep 5 ; \
-		done ; \
-		echo 'Jenkins master is now available' ; \
-	}
+	. .envrc && $(BIN)/check-jenkins-available.sh
 
 # https://stackoverflow.com/a/30082067
 .PHONY: restart-jenkins-master
 restart-jenkins-master:
 	@{ \
 		. .envrc ; \
+		$(BIN)/check-jenkins-available.sh ; \
 		echo 'Restarting Jenkins master' ; \
-		while [[ $$(curl -s -w "%{http_code}" -u '$(JENKINS_LEADER_ADMIN_USER)':'$(JENKINS_LEADER_ADMIN_PASSWORD)' $(JENKINS_URL)/ -o /dev/null) != "200" ]]; do \
-			sleep 5 ; \
-		done ; \
-		curl --request POST -u '$(JENKINS_LEADER_ADMIN_USER)':'$(JENKINS_LEADER_ADMIN_PASSWORD)' $(JENKINS_URL)/quietDown ; \
-		curl --request POST -u '$(JENKINS_LEADER_ADMIN_USER)':'$(JENKINS_LEADER_ADMIN_PASSWORD)' $(JENKINS_URL)/restart ; \
-		while [[ $$(curl -s -w "%{http_code}" -u '$(JENKINS_LEADER_ADMIN_USER)':'$(JENKINS_LEADER_ADMIN_PASSWORD)' $(JENKINS_URL)/ -o /dev/null) != "200" ]]; do \
-			sleep 5 ; \
-		done ; \
-		echo 'Jenkins master is now available' ; \
+		curl --request POST $(JENKINS_AUTH) $(JENKINS_URL)/quietDown ; \
+		curl --request POST $(JENKINS_AUTH) $(JENKINS_URL)/restart ; \
+		$(BIN)/check-jenkins-available.sh ; \
 	}
 
 .PHONY: clean
@@ -95,10 +85,12 @@ install-jenkins-plugins:
 # https://stackoverflow.com/a/12730830
 .PHONY: test
 test:
+	echo $(JENKINS_AUTH)
+	. .envrc && $(BIN)/check-jenkins-available.sh
 	@echo 'Check all required plugins are installed'
 	@{ \
 		. .envrc ; \
-		curl -s --request GET -u '$(JENKINS_LEADER_ADMIN_USER)':'$(JENKINS_LEADER_ADMIN_PASSWORD)' $(JENKINS_URL)/pluginManager/api/json?depth=1 | jq '[ ."plugins"[] | .shortName ]' > /tmp/jenkins_plugins_actual ; \
+		curl -s --request GET $(JENKINS_AUTH) $(JENKINS_URL)/pluginManager/api/json?depth=1 | jq '[ ."plugins"[] | .shortName ]' > /tmp/jenkins_plugins_actual ; \
 		sleep 2 ; \
 		while read LINE  ; \
 		do  \
