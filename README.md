@@ -23,7 +23,7 @@ The drawback is that you either activate the Python virtualenv once with
 ``pipenv shell`` (*preferred*) or prepend ``pipenv run`` to every command. If
 you go the ``pipenv shell`` route, you only have to activate it *once* and then
 run ``invoke`` or ``docker-compose`` as needed. When you're done, you can
-``deactivate`` the virtualenv.
+``exit`` the shell.
 
         $ invoke
 
