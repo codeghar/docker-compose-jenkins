@@ -13,3 +13,14 @@ services:
         tty: true
         volumes:
             - ./jenkins_home:/var/jenkins_home:rw
+
+    cli:
+        image: openjdk:9-jre-slim
+        environment:
+            JENKINS_LEADER_ADMIN_USER: "${JENKINS_LEADER_ADMIN_USER}"
+            JENKINS_LEADER_ADMIN_PASSWORD: "${JENKINS_LEADER_ADMIN_PASSWORD}"
+            JENKINS_URL: "http://jenkins:8080"
+        tty: true
+        volumes:
+            - ./cli:/cli:ro
+        working_dir: /cli

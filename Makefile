@@ -4,7 +4,7 @@ JENKINS_HOME := $(PWD)/jenkins_home
 JENKINS_AUTH := -u '$(JENKINS_LEADER_ADMIN_USER)':'$(JENKINS_LEADER_ADMIN_PASSWORD)'
 
 .PHONY: create
-create: init setup restart-jenkins-master test
+create: init jenkins-master-setup restart-jenkins-master jenkins-master-test jenkins-cli-setup
 
 .PHONY: init
 init: install-prerequisites | $(JENKINS_HOME)/init.groovy.d/admin_user.groovy
@@ -68,10 +68,16 @@ clean: down
 
 .PHONY: destroy
 destroy: clean
+	rm -rf cli/
 	rm -rf jenkins_home/
 
-.PHONY: setup
-setup: up install-jenkins-plugins
+.PHONY: jenkins-master-up
+jenkins-master-up:
+	. .envrc && pipenv run docker-compose up -d jenkins
+	. .envrc && $(BIN)/check-jenkins-available.sh
+
+.PHONY: jenkins-master-setup
+jenkins-master-setup: jenkins-master-up install-jenkins-plugins
 
 .PHONY: install-jenkins-plugins
 install-jenkins-plugins:
@@ -82,9 +88,23 @@ install-jenkins-plugins:
 		pipenv run docker-compose exec jenkins /usr/local/bin/install-plugins.sh $${pluginlist} ; \
 	}
 
+.PHONY: jenkins-cli-setup
+jenkins-cli-setup: | $(PWD)/cli/jenkins-cli.jar
+	. .envrc && pipenv run docker-compose up -d cli
+
+$(PWD)/cli:
+	mkdir -p $(PWD)/cli
+
+$(PWD)/cli/jenkins-cli.jar: | $(PWD)/cli
+	curl -s -o $(PWD)/cli/jenkins-cli.jar $(JENKINS_AUTH) $(JENKINS_URL)/jnlpJars/jenkins-cli.jar
+
+.PHONY: exec-cli
+exec-cli:
+	pipenv run docker-compose exec cli /bin/bash
+
 # https://stackoverflow.com/a/12730830
-.PHONY: test
-test:
+.PHONY: jenkins-master-test
+jenkins-master-test:
 	echo $(JENKINS_AUTH)
 	. .envrc && $(BIN)/check-jenkins-available.sh
 	@echo 'Check all required plugins are installed'

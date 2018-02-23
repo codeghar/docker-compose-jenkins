@@ -22,6 +22,8 @@ config or ideas, etc.
 5. Installs plugins listed in *jenkins_plugins.txt*. See customization section to see how to install your desired plugins.
 6. Restarts the Jenkins server. This gives the Jenkins master to load all settings since changes were made.
 7. Run test(s) to verify all changes were made successfully.
+8. Downloads *jenkins-cli.jar* from Jenkins server to *./cli* directory.
+9. Creates a container (called *cli*) to run *jenkins-cli.jar* and mounts *./cli* directory in it.
 
 # Environment Lifecycle
 
@@ -39,6 +41,10 @@ counterparts *up -d*, *down*, *start*, *stop*, and *ps* respectively in
 Run ``bash`` in Jenkins master container.
 
         $ make exec-master
+
+Run ``bash`` in Jenkins cli container.
+
+        $ make exec-cli
 
 Get a list of all ``make`` targets.
 
@@ -92,12 +98,27 @@ workaround is used in the Makefile.
 
 ## docker-compose.yml
 
+### jenkins
+
+Uses the official distribution of Jenkins in a Docker image.
+
 Mounts *jenkins_home* directory (created by ``make create`` or more
 specifically by ``make init``) into the Jenkins master container.
 
 *JAVA_OPTS* environment variable is used to
 [disable the setup wizard](https://groups.google.com/d/msg/jenkinsci-users/Pb4QZVc2-f0/PJnKcbieBgAJ)
 since all that work is done through automation.
+
+### cli
+
+Uses the official distribution of OpenJDK JRE in a Docker image.
+
+Mounts *cli* directory (created by ``make create``) into the cli container.
+
+The *JENKINS_URL* environment variable -- when set -- is picked up by the cli
+and the user does not need to provide the ``-s`` flag anymore ([Source](https://jenkins.io/doc/book/managing/cli/#using-the-client)).
+In this instance, since both containers are on the same Docker network, using
+the name of the Jenkins container works.
 
 ## Makefile
 
