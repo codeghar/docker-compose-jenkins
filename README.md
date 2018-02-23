@@ -8,65 +8,76 @@ config or ideas, etc.
 * Docker
 * Python 3.6+
 * [pipenv](https://docs.pipenv.org/)
-* GNU make
-* jq
+
+# Optional
+
+* direnv
 
 # Initial Setup
 
-        $ make create
+        $ pipenv install
 
-1. Installs required Python packages using ``pipenv``.
-2. Creates *./jenkins_home/* directory, to be mounted in the Jenkins master container.
-3. Copies *jenkins_admin_user.groovy* to *jenkins_home/init.groovy.d/*. This file creates a default admin user without needing to do the same in the web interface. See customization section for more information.
-4. Creates the Jenkins master container.
-5. Installs plugins listed in *jenkins_plugins.txt*. See customization section to see how to install your desired plugins.
-6. Restarts the Jenkins server. This gives the Jenkins master to load all settings since changes were made.
-7. Run test(s) to verify all changes were made successfully.
-8. Downloads *jenkins-cli.jar* from Jenkins server to *./cli* directory.
-9. Creates a container (called *cli*) to run *jenkins-cli.jar* and mounts *./cli* directory in it.
+Installs required Python packages using ``pipenv``.
 
-# Environment Lifecycle
+The drawback is that you either activate the Python virtualenv once with
+``pipenv shell`` (*preferred*) or prepend ``pipenv run`` to every command. If
+you go the ``pipenv shell`` route, you only have to activate it *once* and then
+run ``invoke`` or ``docker-compose`` as needed. When you're done, you can
+``deactivate`` the virtualenv.
 
-``docker-compose`` is used to manage the lifecycle of containers. Helper
-targets in ``make`` are *up*, *down*, *start*, *stop*, and *ps* based on their
-counterparts *up -d*, *down*, *start*, *stop*, and *ps* respectively in
-``docker-compose``.
+        $ invoke
 
-        $ make up
-        $ make ps
-        $ make stop
-        $ make start
-        $ make down
+[Invoke](http://docs.pyinvoke.org/en/latest/) is used to run the *create* and
+*destroy* tasks described below. It's a task execution mechanism similar to
+``make``. It runs the tasks in *tasks.py*.
+
+        $ direnv allow
+
+If you have installed ``direnv``
+([highly recommended](https://github.com/direnv/direnv)), it uses *.envrc* file
+to export the required environment variables as long as you are in this
+directory.
+
+# Create
+
+        $ pipenv shell  # activate Python virtualenv
+        $ . .envrc  # export required environment variables; not needed if you have direnv
+        $ invoke create
+
+1. Creates *./jenkins_home/* directory, to be mounted in the Jenkins master container.
+2. Copies *jenkins_admin_user.groovy* to *jenkins_home/init.groovy.d/* directory. This file creates a default admin user without needing to do the same in the web interface. See customization section for more information.
+3. Creates the Jenkins master container.
+4. Downloads *jenkins-cli.jar* from Jenkins server to *./cli* directory.
+5. Creates a container (called *cli*) to run *jenkins-cli.jar* and mounts *./cli* directory in it.
+6. Installs plugins listed in *jenkins_plugins.txt*. See customization section to see how to install your desired plugins.
+7. Verifies all plugins were installed successfully.
+
+# Destroy
+
+        $ pipenv shell  # activate Python virtualenv
+        $ . .envrc  # export required environment variables; not needed if you have direnv
+        $ invoke destroy
+
+1. Destroys all containers.
+2. Deletes *cli* and *jenkins_home* directories.
+
+# Container Lifecycle
+
+        $ pipenv shell  # activate Python virtualenv
+        $ . .envrc  # export required environment variables; not needed if you have direnv
+        $ docker-compose
+
+``docker-compose`` is used to manage the lifecycle of containers.
 
 Run ``bash`` in Jenkins master container.
 
-        $ make exec-master
+        $ pipenv shell  # activate Python virtualenv
+        $ docker-compose exec jenkins bash
 
 Run ``bash`` in Jenkins cli container.
 
-        $ make exec-cli
-
-Get a list of all ``make`` targets.
-
-        $ make list
-
-The *Makefile* is pretty simple; feel free to read it for more information.
-
-## Caution
-
-Cleaning up the environment is synonymous with *down*.
-
-        $ make clean
-
-## Alert
-
-Destroying the environment removes all containers and rolls back changes made
-to the git repo in the *init* target.
-
-        $ make destroy
-
-1. Destroys all containers.
-2. Deletes *jenkins_home* directory.
+        $ pipenv shell  # activate Python virtualenv
+        $ docker-compose exec cli bash
 
 # Customize
 
@@ -119,10 +130,6 @@ The *JENKINS_URL* environment variable -- when set -- is picked up by the cli
 and the user does not need to provide the ``-s`` flag anymore ([Source](https://jenkins.io/doc/book/managing/cli/#using-the-client)).
 In this instance, since both containers are on the same Docker network, using
 the name of the Jenkins container works.
-
-## Makefile
-
-May not require too much attention but you never know.
 
 # Notes
 
