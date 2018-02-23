@@ -45,13 +45,12 @@ directory.
         $ invoke create
 
 1. Creates *./jenkins_home/* directory, to be mounted in the Jenkins master container.
-2. Copies *jenkins_admin_user.groovy* to *jenkins_home/init.groovy.d/* directory. This file creates a default admin user without needing to do the same in the web interface. See customization section for more information.
-3. Copies *jenkins_harden.groovy* to *./jenkins_home/init.groovy.d/* directory to harden the install.
-4. Creates the Jenkins master container.
-5. Downloads *jenkins-cli.jar* from Jenkins server to *./cli* directory.
-6. Creates a container (called *cli*) to run *jenkins-cli.jar* and mounts *./cli* directory in it.
-7. Installs plugins listed in *jenkins_plugins.txt*. See customization section to see how to install your desired plugins.
-8. Verifies all plugins were installed successfully.
+2. Copies some groovy scripts to *jenkins_home/init.groovy.d/* directory.
+3. Creates the Jenkins master container.
+4. Downloads *jenkins-cli.jar* from Jenkins server to *./cli* directory.
+5. Creates a container (called *cli*) to run *jenkins-cli.jar* and mounts *./cli* directory in it.
+6. Installs plugins listed in *jenkins_plugins.txt*. See customization section to see how to install your desired plugins.
+7. Verifies all plugins were installed successfully.
 
 # Destroy
 
@@ -100,9 +99,16 @@ for user name and password are read in the container from environment variables
 Source:
 [Automating Jenkins Docker Setup](https://technologyconversations.com/2017/06/16/automating-jenkins-docker-setup/).
 
+## jenkins_csrf.groovy
+
+It's a Groovy script to
+[enable CSRF protection](https://wiki.jenkins.io/display/JENKINS/CSRF+Protection).
+You should not need to modify it.
+
 ## jenkins_harden.groovy
 
-Hardens the Jenkins server. You should not need to modify it.
+It's a Groovy script to harden the Jenkins server. You should not need to
+modify it.
 
 ## jenkins_plugins.txt
 

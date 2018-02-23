@@ -92,6 +92,8 @@ def jenkins_master_init(ctx):
     os.makedirs(os.path.join(JENKINS_HOME_DIR, "init.groovy.d"), exist_ok=True)
     shutil.copy2(os.path.join(".", "jenkins_admin_user.groovy"),
                  os.path.join(JENKINS_HOME_DIR, "init.groovy.d", "admin_user.groovy"))
+    shutil.copy2(os.path.join(".", "jenkins_csrf.groovy"),
+                 os.path.join(JENKINS_HOME_DIR, "init.groovy.d", "csrf.groovy"))
     shutil.copy2(os.path.join(".", "jenkins_harden.groovy"),
                  os.path.join(JENKINS_HOME_DIR, "init.groovy.d", "harden.groovy"))
 
