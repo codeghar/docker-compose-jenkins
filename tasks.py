@@ -16,6 +16,7 @@ JENKINS_USER = os.environ["JENKINS_LEADER_ADMIN_USER"]
 PLUGINS_FILE = os.path.join(".", "jenkins_plugins.txt")
 
 JENKINS_AUTH = requests.auth.HTTPBasicAuth(JENKINS_USER, JENKINS_PASSWORD)
+JENKINS_CLI_BASE = f"docker-compose exec cli java -jar jenkins-cli.jar -auth {JENKINS_USER}:{JENKINS_PASSWORD}"
 
 with open(PLUGINS_FILE) as pfh:
     REQUIRED_PLUGINS = [l.strip() for l in pfh.readlines()]
@@ -45,6 +46,8 @@ def create(ctx):
     if diff:
         print(f"All required plugins were not installed. Missing: {diff}")
         exit(24)
+
+    create_seed_job(ctx)
 
 
 @invoke.task
@@ -149,18 +152,20 @@ def install_jenkins_plugins(ctx, plugins=None):
     :param plugins: List of plugins to install
     :return: None
     """
-    cmd = f"docker-compose exec cli java -jar jenkins-cli.jar -auth {JENKINS_USER}:{JENKINS_PASSWORD} install-plugin"
+    cmd = f"{JENKINS_CLI_BASE} install-plugin"
     for plugin in plugins:
         ctx.run(f"{cmd} {plugin} -deploy", pty=True, hide=True)
 
 
-def restart_jenkins(ctx):
+def restartjenkins(ctx):
     """
     Safely restart Jenkins server using cli
 
     :return: None
     """
-    ctx.run(f"docker-compose exec cli java -jar jenkins-cli.jar -auth {JENKINS_USER}:{JENKINS_PASSWORD} safe-restart")
+    print("LOG: Restart Jenkins")
+    ctx.run(f"{JENKINS_CLI_BASE} safe-restart",
+            pty=True, hide=True)
 
     def is_up():
         for i in range(0, 10):
@@ -260,3 +265,21 @@ def download_file(url, dest, auth=None):
         for chunk in result.iter_content(chunk_size=1024):
             if chunk:  # filter out keep-alive
                 dfh.write(chunk)
+
+
+def create_seed_job(ctx):
+    """
+    Create seed job on Jenkins server
+
+    :param ctx: Context object passed to the parent task by invoke
+    :return: None
+    """
+    # Use *exec -T* because a file (seed-job.xml) is being read and piped to
+    # the docker-compose command.
+    # When *exec -T* is not used, docker-compose gives an error
+    # "the input device is not a TTY" and the command does not succeed,
+    # even when ctx.run() is given pty=True like so: ctx.run(cmd, pty=True).
+    cmd = "docker-compose exec -T cli java -jar jenkins-cli.jar " + \
+          f"-auth {JENKINS_USER}:{JENKINS_PASSWORD} " + \
+          "create-job seed < ./seed-job.xml"
+    ctx.run(cmd, hide=True)
