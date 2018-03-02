@@ -145,6 +145,7 @@ def install_jenkins_plugins(ctx, plugins=None):
 
     An alternative way is to run the following command in the Jenkins container. Its biggest drawback is that, unlike
     Jenkins CLI, it does not "deploy" the plugin(s) after install thus requires a restart to make them active.
+    Also requires a workaround identified in https://github.com/jenkinsci/docker/issues/348.
 
             /usr/local/bin/install-plugins.sh plugin1 plugin2 ...
 

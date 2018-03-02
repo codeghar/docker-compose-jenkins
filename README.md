@@ -51,6 +51,7 @@ directory.
 5. Creates a container (called *cli*) to run *jenkins-cli.jar* and mounts *./cli* directory in it.
 6. Installs plugins listed in *jenkins_plugins.txt*. See customization section to see how to install your desired plugins.
 7. Verifies all plugins were installed successfully.
+8. Creates a seed job using Job DSL plugin. See customization section for how to modify the job.
 
 # Destroy
 
@@ -115,8 +116,7 @@ modify it.
 Modify this list to include the plugins you want to install.
 [Jenkins Plugins Index](https://plugins.jenkins.io) has more information.
 
-Based on [issue 348](https://github.com/jenkinsci/docker/issues/348), a
-workaround is used in the Makefile.
+Job DSL plugin is required since it is used to create a seed job.
 
 ## docker-compose.yml
 
@@ -141,6 +141,14 @@ The *JENKINS_URL* environment variable -- when set -- is picked up by the cli
 and the user does not need to provide the ``-s`` flag anymore ([Source](https://jenkins.io/doc/book/managing/cli/#using-the-client)).
 In this instance, since both containers are on the same Docker network, using
 the name of the Jenkins container works.
+
+## seed-job.xml
+
+Contains the config for a seed job. This xml file was created by creating a job
+in the web UI of Jenkins.
+
+The file uses Job DSL plugin with a Groovy script. Modify it to match your
+requirements.
 
 # Notes
 
