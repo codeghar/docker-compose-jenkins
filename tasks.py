@@ -169,7 +169,7 @@ def restartjenkins(ctx):
             pty=True, hide=True)
 
     def is_up():
-        for i in range(0, 10):
+        for _ in range(0, 10):
             available = check_jenkins_available()
             print(f"LOG: Available: {available}")
             if available:
