@@ -10,8 +10,5 @@ name = "pypi"
 docker-compose = "*"
 invoke = "*"
 requests = "*"
-pylint = "*"
-
 
 [dev-packages]
-
